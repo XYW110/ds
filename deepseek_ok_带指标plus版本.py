@@ -1,3 +1,4 @@
+
 import os
 import time
 import schedule
@@ -18,6 +19,7 @@ deepseek_client = OpenAI(
 )
 
 # 初始化OKX交易所
+# type: ignore[arg-type]
 exchange = ccxt.okx({
     'options': {
         'defaultType': 'swap',  # OKX使用swap表示永续合约
@@ -345,7 +347,7 @@ def analyze_with_deepseek(price_data):
 
     # 添加当前持仓信息
     current_pos = get_current_position()
-    position_text = "无持仓" if not current_pos else f"{current_pos['side']}仓, 数量: {current_pos['size']}, 盈亏: {current_pos['unrealized_pnl']:.2f}USDT"
+    position_text = "无持仓" if not current_pos else f"{current_pos.get('side', 'N/A')}仓, 数量: {current_pos.get('size', 0)}, 盈亏: {current_pos.get('unrealized_pnl', 0):.2f}USDT"
 
     prompt = f"""
     你是一个专业的加密货币交易分析师。请基于以下BTC/USDT {TRADE_CONFIG['timeframe']}周期数据进行分析：
@@ -363,8 +365,8 @@ def analyze_with_deepseek(price_data):
     - 本K线最低: ${price_data['low']:,.2f}
     - 本K线成交量: {price_data['volume']:.2f} BTC
     - 价格变化: {price_data['price_change']:+.2f}%
-    - 当前持仓: {position_text}
-    - 持仓盈亏: {current_pos['unrealized_pnl']:.2f} USDT" if current_pos else "持仓盈亏: 0 USDT
+    - 当前持仓: %s
+    - 持仓盈亏: {current_pos.get('unrealized_pnl', 0):.2f} USDT" if current_pos else "持仓盈亏: 0 USDT
 
     【防频繁交易重要原则】
     1. **趋势持续性优先**: 不要因单根K线或短期波动改变整体趋势判断
@@ -414,8 +416,16 @@ def analyze_with_deepseek(price_data):
             temperature=0.1
         )
 
-        # 安全解析JSON
+        # 安全解析JSON        # 安全解析JSON
+        if not response.choices or not response.choices[0].message:
+            print("❌ DeepSeek返回数据为空")
+            return create_fallback_signal(price_data)
+
         result = response.choices[0].message.content
+        if result is None:
+            print("❌ DeepSeek返回内容为空")
+            return create_fallback_signal(price_data)
+
         print(f"DeepSeek原始回复: {result}")
 
         # 提取JSON部分

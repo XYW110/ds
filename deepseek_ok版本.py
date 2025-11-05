@@ -17,7 +17,15 @@ deepseek_client = OpenAI(
 )
 
 # 初始化OKX交易所
-exchange = ccxt.okx({
+# type: ignore[arg-type]
+# ccxt configuration
+config = {
+    'options': {'defaultType': 'swap'},
+    'apiKey': os.getenv('OKX_API_KEY'),
+    'secret': os.getenv('OKX_SECRET'),
+    'password': os.getenv('OKX_PASSWORD'),
+}
+exchange = ccxt.okx(config)  # type: ignore[arg-type]
     'options': {
         'defaultType': 'swap',  # OKX使用swap表示永续合约
     },
@@ -204,8 +212,16 @@ def analyze_with_deepseek(price_data):
             stream=False
         )
 
-        # 安全解析JSON
+        # 安全解析JSON        # 安全解析JSON
+        if not response.choices or not response.choices[0].message:
+            print("❌ DeepSeek返回数据为空")
+            return None
+
         result = response.choices[0].message.content
+        if result is None:
+            print("❌ DeepSeek返回内容为空")
+            return None
+
         start_idx = result.find('{')
         end_idx = result.rfind('}') + 1
         if start_idx != -1 and end_idx != 0:

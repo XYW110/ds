@@ -18,8 +18,16 @@ deepseek_client = OpenAI(
     base_url="https://api.deepseek.com"
 )
 
+# type: ignore[arg-type]
 # 初始化OKX交易所
-exchange = ccxt.okx({
+# ccxt configuration
+config = {
+    'options': {'defaultType': 'swap'},
+    'apiKey': os.getenv('OKX_API_KEY'),
+    'secret': os.getenv('OKX_SECRET'),
+    'password': os.getenv('OKX_PASSWORD'),
+}
+exchange = ccxt.okx(config)  # type: ignore[arg-type]
     'options': {
         'defaultType': 'swap',  # OKX使用swap表示永续合约
     },
@@ -98,10 +106,10 @@ def setup_exchange():
         if has_isolated_position:
             print("❌ 检测到逐仓持仓，程序无法继续运行！")
             print(f"📊 逐仓持仓详情:")
-            print(f"   - 方向: {isolated_position_info['side']}")
-            print(f"   - 数量: {isolated_position_info['size']}")
-            print(f"   - 入场价: {isolated_position_info['entry_price']}")
-            print(f"   - 模式: {isolated_position_info['mode']}")
+            print(f"   - 方向: {isolated_position_info.get('side') if isolated_position_info else 'N/A'}")
+            print(f"   - 数量: {isolated_position_info.get('size') if isolated_position_info else 'N/A'}")
+            print(f"   - 入场价: {isolated_position_info.get('entry_price') if isolated_position_info else 'N/A'}")
+            print(f"   - 模式: {isolated_position_info.get('mode') if isolated_position_info else 'N/A'}")
             print("\n🚨 解决方案:")
             print("1. 手动平掉所有逐仓持仓")
             print("2. 或者将逐仓持仓转为全仓模式")
@@ -696,8 +704,16 @@ def analyze_with_deepseek(price_data):
             temperature=0.1
         )
 
-        # 安全解析JSON
+        # 安全解析JSON        # 安全解析JSON
+        if not response.choices or not response.choices[0].message:
+            print("❌ DeepSeek返回数据为空")
+            return create_fallback_signal(price_data)
+
         result = response.choices[0].message.content
+        if result is None:
+            print("❌ DeepSeek返回内容为空")
+            return create_fallback_signal(price_data)
+
         print(f"DeepSeek原始回复: {result}")
 
         # 提取JSON部分

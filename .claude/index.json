@@ -1,0 +1,156 @@
+{
+  "timestamp": "2025-11-05T11:26:39Z",
+  "project_root": "D:/Work/Project/ToolProject/ds",
+  "project_type": "single_module",
+  "scan_strategy": "mixed_concise_detailed",
+  "total_files_scanned": 6,
+  "total_files_estimated": 6,
+  "coverage_percentage": 100,
+  "modules": [
+    {
+      "name": "基础版策略",
+      "path": "deepseek.py",
+      "type": "trading_strategy",
+      "version": "v1.0",
+      "language": "python",
+      "entry_point": "main()",
+      "description": "基础版DeepSeek交易策略，集成AI分析和Binance接口",
+      "key_features": [
+        "DeepSeek AI集成",
+        "Binance期货接口",
+        "基础K线分析",
+        "自动调度系统"
+      ],
+      "dependencies": [
+        "ccxt",
+        "openai",
+        "pandas",
+        "schedule",
+        "python-dotenv"
+      ],
+      "tests": "未发现独立测试文件",
+      "docs_path": "deepseek_基础版策略_CLAUDE.md"
+    },
+    {
+      "name": "OKX基础版",
+      "path": "deepseek_ok版本.py",
+      "type": "trading_strategy",
+      "version": "v2.0",
+      "language": "python",
+      "entry_point": "main()",
+      "description": "OKX交易所适配版，使用永续合约和全仓模式",
+      "key_features": [
+        "OKX永续合约",
+        "全仓模式设置",
+        "双向持仓支持",
+        "交易密码集成"
+      ],
+      "dependencies": [
+        "ccxt",
+        "openai",
+        "pandas",
+        "schedule",
+        "python-dotenv"
+      ],
+      "tests": "未发现独立测试文件",
+      "docs_path": "deepseek_OKX基础版_CLAUDE.md"
+    },
+    {
+      "name": "技术指标增强版",
+      "path": "deepseek_ok_带指标plus版本.py",
+      "type": "trading_strategy",
+      "version": "v3.0",
+      "language": "python",
+      "entry_point": "main()",
+      "description": "完整技术指标分析版，包含SMA、MACD、RSI、布林带等",
+      "key_features": [
+        "完整技术指标库",
+        "支撑阻力位分析",
+        "多周期趋势判断",
+        "24小时历史数据"
+      ],
+      "dependencies": [
+        "ccxt",
+        "openai",
+        "pandas",
+        "schedule",
+        "python-dotenv"
+      ],
+      "tests": "未发现独立测试文件",
+      "docs_path": "deepseek_技术指标增强版_CLAUDE.md"
+    },
+    {
+      "name": "完整策略版",
+      "path": "deepseek_ok_带市场情绪+指标版本.py",
+      "type": "trading_strategy",
+      "version": "v4.0",
+      "language": "python",
+      "entry_point": "main()",
+      "description": "最完整交易策略，集成情绪数据、智能仓位和防频繁交易",
+      "key_features": [
+        "市场情绪数据API",
+        "智能仓位管理",
+        "防频繁交易机制",
+        "整点定时执行",
+        "错误重试机制",
+        "备用信号生成"
+      ],
+      "dependencies": [
+        "ccxt",
+        "openai",
+        "pandas",
+        "schedule",
+        "python-dotenv",
+        "requests"
+      ],
+      "tests": "未发现独立测试文件",
+      "docs_path": "deepseek_完整策略版_CLAUDE.md",
+      "recommended": true
+    }
+  ],
+  "root_docs": {
+    "path": "CLAUDE.md",
+    "sections": [
+      "项目愿景",
+      "架构概览",
+      "Mermaid结构图",
+      "模块索引",
+      "运行环境与开发",
+      "测试策略",
+      "编码规范",
+      "AI使用指南",
+      "版本演进",
+      "变更日志"
+    ],
+    "generated_mermaid_diagram": true
+  },
+  "config_files": [
+    {
+      "path": "requirements.txt",
+      "type": "dependencies",
+      "description": "Python依赖包列表"
+    },
+    {
+      "path": "README.md",
+      "type": "documentation",
+      "description": "项目说明文档"
+    }
+  ],
+  "scan_gaps": [],
+  "ignored_dirs": [],
+  "truncated": false,
+  "next_recommended_steps": [
+    "建议使用完整策略版 (deepseek_ok_带市场情绪+指标版本.py)",
+    "配置 .env 文件中的 API 密钥",
+    "在测试模式中验证策略有效性",
+    "根据需要调整智能仓位管理参数",
+    "考虑添加独立的单元测试文件"
+  ],
+  "notes": [
+    "项目为单模块结构，所有文件位于根目录",
+    "四个策略版本代表项目演进过程",
+    "完整策略版包含所有功能，推荐使用",
+    "未发现 .gitignore 文件，使用默认忽略规则",
+    "未发现测试目录或测试文件"
+  ]
+}

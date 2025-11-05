@@ -15,6 +15,7 @@ deepseek_client = OpenAI(
     api_key=os.getenv('DEEPSEEK_API_KEY'),
     base_url="https://api.deepseek.com"
 )
+# type: ignore[arg-type]
 
 exchange = ccxt.binance({
     'options': {'defaultType': 'future'},
@@ -211,8 +212,16 @@ def analyze_with_deepseek(price_data):
             stream=False
         )
 
-        # 安全解析JSON
+        # 安全解析JSON        # 安全解析JSON
+        if not response.choices or not response.choices[0].message:
+            print("❌ DeepSeek返回数据为空")
+            return None
+
         result = response.choices[0].message.content
+        if result is None:
+            print("❌ DeepSeek返回内容为空")
+            return None
+
         start_idx = result.find('{')
         end_idx = result.rfind('}') + 1
         if start_idx != -1 and end_idx != 0:
