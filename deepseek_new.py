@@ -3,31 +3,22 @@ import time
 import schedule
 from openai import OpenAI
 import ccxt
-from ccxt.base.types import ConstructorArgs
-from typing import cast
-
-from typing import Any, Dict
+from typing import TypedDict, Dict, Any
 
 
-def get_binance_config() -> Dict[str, Any]:
-    """安全获取Binance配置"""
-    api_key = os.getenv('BINANCE_API_KEY')
-    secret = os.getenv('BINANCE_SECRET')
+class ExchangeConfig(TypedDict, total=False):
+    options: Dict[str, Any]
+    apiKey: str
+    secret: str
+    password: str
 
-    if not api_key:
-        raise ValueError("BINANCE_API_KEY environment variable not set")
-    if not secret:
-        raise ValueError("BINANCE_SECRET environment variable not set")
-
-    # CCXT标准配置格式
-    config = {  # 类型: Dict[str, Any] - 将通过cast转换为ConstructorArgs
-        'options': {'defaultType': 'future'},
-        'apiKey': api_key,
-        'secret': secret,
-    }
-    return cast(ConstructorArgs, config)  # 类型: ignore[assignment]  # 安全的字典到ConstructorArgs转换
-
-exchange = ccxt.binance(get_binance_config())  # type: ignore[arg-type]  # ConstructorArgs类型安全
+# Exchange configuration
+exchange_config: ExchangeConfig = {
+    'options': {'defaultType': 'future'},
+    'apiKey': os.getenv('BINANCE_API_KEY'),
+    'secret': os.getenv('BINANCE_SECRET'),
+}
+exchange = ccxt.binance(exchange_config)
 
 import pandas as pd
 from datetime import datetime
@@ -37,11 +28,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 初始化DeepSeek客户端
-# 初始化DeepSeek客户端
 deepseek_client = OpenAI(
     api_key=os.getenv('DEEPSEEK_API_KEY'),
     base_url="https://api.deepseek.com"
 )
+
+
+exchange = ccxt.binance({
+    'options': {'defaultType': 'future'},
+    'apiKey': os.getenv('BINANCE_API_KEY'),
+    'secret': os.getenv('BINANCE_SECRET'),
+})
 
 # 交易参数配置
 TRADE_CONFIG = {

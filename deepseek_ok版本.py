@@ -3,6 +3,37 @@ import time
 import schedule
 from openai import OpenAI
 import ccxt
+from ccxt.base.types import ConstructorArgs
+from typing import cast
+
+from typing import Any, Dict
+
+
+
+def get_okx_config() -> ConstructorArgs:
+    """安全获取OKX配置"""
+    api_key = os.getenv('OKX_API_KEY')
+    secret = os.getenv('OKX_SECRET')
+    password = os.getenv('OKX_PASSWORD')
+
+    if not api_key:
+        raise ValueError("OKX_API_KEY environment variable not set")
+    if not secret:
+        raise ValueError("OKX_SECRET environment variable not set")
+    if not password:
+        raise ValueError("OKX_PASSWORD environment variable not set")
+
+    # CCXT标准配置格式
+    config = {  # 类型: Dict[str, Any] - 将通过cast转换为ConstructorArgs
+        'options': {'defaultType': 'swap'},
+        'apiKey': api_key,
+        'secret': secret,
+        'password': password,
+    }
+    return cast(ConstructorArgs, config)  # 类型: ignore[assignment]  # 安全的字典到ConstructorArgs转换
+
+exchange = ccxt.okx(get_okx_config())
+
 import pandas as pd
 from datetime import datetime
 import json
@@ -16,23 +47,6 @@ deepseek_client = OpenAI(
     base_url="https://api.deepseek.com"
 )
 
-# 初始化OKX交易所
-# type: ignore[arg-type]
-# ccxt configuration
-config = {
-    'options': {'defaultType': 'swap'},
-    'apiKey': os.getenv('OKX_API_KEY'),
-    'secret': os.getenv('OKX_SECRET'),
-    'password': os.getenv('OKX_PASSWORD'),
-}
-exchange = ccxt.okx(config)  # type: ignore[arg-type]
-    'options': {
-        'defaultType': 'swap',  # OKX使用swap表示永续合约
-    },
-    'apiKey': os.getenv('OKX_API_KEY'),
-    'secret': os.getenv('OKX_SECRET'),
-    'password': os.getenv('OKX_PASSWORD'),  # OKX需要交易密码
-})
 
 # 交易参数配置
 TRADE_CONFIG = {
