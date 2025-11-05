@@ -155,3 +155,4 @@ signal_history.json
 config.json
 api_keys.txt
 secrets.txt
+/.bmad-core
