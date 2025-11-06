@@ -1,0 +1,26 @@
+[tool.pyright]
+# Basic type checking mode - more permissive
+typeCheckingMode = "basic"
+
+# Disable specific diagnostic rules that cause too many false positives
+reportGeneralTypeIssues = "information"
+reportUnknownMemberType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownVariableType = "none"
+reportOptionalMemberAccess = "none"
+reportOptionalSubscript = "none"
+reportOptionalOperand = "none"
+reportOptionalIterable = "none"
+reportOptionalCall = "none"
+
+[tool.mypy]
+# Optional: Configure mypy if you prefer it over pyright
+python_version = "3.10"
+ignore_missing_imports = true
+disable_error_code = [
+    "attr-defined",
+    "assignment",
+    "call-arg",
+    "index",
+    "operator"
+]

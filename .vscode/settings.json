@@ -1,0 +1,49 @@
+{
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportUnknownMemberType": "none",
+    "reportUnknownArgumentType": "none",
+    "reportUnknownVariableType": "none",
+    "reportUnknownLambdaType": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportOptionalMemberAccess": "none",
+    "reportOptionalSubscript": "none",
+    "reportOptionalOperand": "none",
+    "reportOptionalIterable": "none",
+    "reportOptionalCall": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportCallIssue": "none",
+    "reportIndexIssue": "none",
+    "reportInvalidTypeArguments": "none",
+    "reportAssignmentTypeMismatch": "none",
+    "reportReturnTypeMismatch": "none",
+    "reportOperatorIssue": "none",
+    "reportUnsupportedDunderAll": "none",
+    "reportUntypedFunctionDecorator": "none",
+    "reportUntypedClassDef": "none",
+    "reportUntypedFunctionDef": "none",
+    "reportUntypedMethodSignature": "none",
+    "reportUntypedNamedTuple": "none",
+    "reportUntypedBaseClass": "none",
+    "reportPrivateImportUsage": "none",
+    "reportConstantRedefinition": "none",
+    "reportInvalidStringEscapeSequence": "none",
+    "reportInvalidTypeVarUsage": "none",
+    "reportSelfClsParameterName": "none"
+  },
+  "python.linting.enabled": false,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "python.linting.mypyEnabled": false,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.suggestAutoImportCompletions": true,
+  "python.analysis.packageIndexDepths": [3],
+  "python.analysis.include": [
+    "src/**/*.py"
+  ],
+  "python.analysis.exclude": [
+    "**/__pycache__/**",
+    "**/node_modules/**",
+    "**/.pytest_cache/**"
+  ]
+}
