@@ -115,8 +115,8 @@ class AIAnalyzer:
         sentiment_text = market_data.get('sentiment_text', '【市场情绪】数据暂不可用')
 
         # 构建K线数据文本
-        kline_text = f"【最近5根{market_data.get('timeframe', '15m')}K线数据】\n"
-        for i, kline in enumerate(kline_data[-5:]):
+        kline_text = f"【最近{self.config.kline_display_count}根{market_data.get('timeframe', '15m')}K线数据】\n"
+        for i, kline in enumerate(kline_data[-self.config.kline_display_count:]):
             trend = "阳线" if kline['close'] > kline['open'] else "阴线"
             change = ((kline['close'] - kline['open']) / kline['open']) * 100
             kline_text += f"K线{i + 1}: {trend} 开盘:{kline['open']:.2f} 收盘:{kline['close']:.2f} 涨跌:{change:+.2f}%\n"
@@ -213,7 +213,7 @@ class AIAnalyzer:
                     break
 
                 # 指数退避重试
-                wait_time = min(2 ** retry_count, 10)
+                wait_time = min(self.config.retry_backoff_base ** retry_count, self.config.retry_max_wait)
                 print(f"⏳ 等待 {wait_time} 秒后重试...")
                 time.sleep(wait_time)
 

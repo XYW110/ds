@@ -18,8 +18,9 @@ class OrderExecutor:
     def __init__(self, exchange_adapter):
         self.exchange = exchange_adapter
         self.config = get_config().trading
+        self.executor_config = get_config().order_executor
         self.order_history: List[Dict[str, Any]] = []
-        self.max_history = 100
+        self.max_history = self.executor_config.max_history
 
     def execute_trade_signal(self, signal_data: Dict[str, Any],
                            market_data: Dict[str, Any],
@@ -134,7 +135,7 @@ class OrderExecutor:
                 self._set_stop_loss_take_profit(symbol, signal_data, order)
 
                 # 更新持仓状态
-                time.sleep(2)  # 等待订单生效
+                time.sleep(self.executor_config.wait_seconds)  # 等待订单生效
                 new_position = self._get_current_position(symbol)
 
                 self._record_order(order, 'open_new', signal_data)
@@ -185,7 +186,7 @@ class OrderExecutor:
                 }
 
             # 2. 等待平仓完成
-            time.sleep(2)
+            time.sleep(self.executor_config.wait_seconds)
 
             # 3. 开新仓
             new_order = self._create_market_order(symbol, new_side, position_size)
@@ -195,7 +196,7 @@ class OrderExecutor:
                 self._set_stop_loss_take_profit(symbol, signal_data, new_order)
 
                 # 更新持仓状态
-                time.sleep(2)
+                time.sleep(self.executor_config.wait_seconds)
                 new_position = self._get_current_position(symbol)
 
                 self._record_order(close_order, 'close_old', signal_data)
@@ -242,7 +243,7 @@ class OrderExecutor:
                 self._adjust_stop_loss_take_profit(symbol, signal_data, current_position)
 
                 # 更新持仓状态
-                time.sleep(2)
+                time.sleep(self.executor_config.wait_seconds)
                 new_position = self._get_current_position(symbol)
 
                 self._record_order(order, 'add_position', signal_data)
@@ -276,7 +277,7 @@ class OrderExecutor:
                 side=side,
                 amount=amount,
                 order_type='market',
-                params={'tag': 'deepseek_bot'}
+                params={'tag': self.executor_config.order_tag_open}
             )
 
             print(f"✅ 订单创建成功: {order.id}")
@@ -303,7 +304,7 @@ class OrderExecutor:
                 side=close_side,
                 amount=size,
                 order_type='market',
-                params={'reduceOnly': True, 'tag': 'deepseek_bot_close'}
+                params={'reduceOnly': True, 'tag': self.executor_config.order_tag_close}
             )
 
             if order:

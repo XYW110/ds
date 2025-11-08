@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 交易所工厂模块
 
@@ -80,16 +81,23 @@ class ExchangeFactory:
         从配置创建交易所适配器
 
         Args:
-            exchange_name: 交易所名称，如果为None则自动检测
+            exchange_name: 交易所名称，如果为None则从配置读取
 
         Returns:
             ExchangeAdapter: 交易所适配器实例
         """
         config = get_config()
 
-        # 如果没有指定交易所，自动检测可用的交易所
+        # 如果没有指定交易所，使用配置中的默认交易所
         if exchange_name is None:
-            exchange_name = cls._detect_available_exchange()
+            default_exchange = config.trading.default_exchange.lower()
+
+            if default_exchange == 'auto':
+                # 自动检测可用的交易所
+                exchange_name = cls._detect_available_exchange()
+            else:
+                # 使用指定的交易所
+                exchange_name = default_exchange
 
         return cls.create_adapter(exchange_name)
 
@@ -100,6 +108,9 @@ class ExchangeFactory:
 
         Returns:
             str: 可用的交易所名称
+
+        Raises:
+            ValueError: 没有找到可用的交易所API密钥配置
         """
         config = get_config()
         api_keys = config.api_keys
@@ -110,7 +121,32 @@ class ExchangeFactory:
         elif all([api_keys['binance_api_key'], api_keys['binance_secret']]):
             return 'binance'
         else:
-            raise ValueError("没有找到可用的交易所API密钥配置")
+            # 详细的错误信息
+            okx_missing = []
+            binance_missing = []
+
+            if not api_keys['okx_api_key']:
+                okx_missing.append('OKX_API_KEY')
+            if not api_keys['okx_secret']:
+                okx_missing.append('OKX_SECRET')
+            if not api_keys['okx_password']:
+                okx_missing.append('OKX_PASSWORD')
+
+            if not api_keys['binance_api_key']:
+                binance_missing.append('BINANCE_API_KEY')
+            if not api_keys['binance_secret']:
+                binance_missing.append('BINANCE_SECRET')
+
+            error_msg = "No available exchange API keys found\n"
+            if okx_missing and binance_missing:
+                error_msg += f"OKX missing: {', '.join(okx_missing)}\n"
+                error_msg += f"Binance missing: {', '.join(binance_missing)}"
+            elif okx_missing:
+                error_msg += f"OKX missing: {', '.join(okx_missing)} (Binance also required)"
+            else:
+                error_msg += f"Binance missing: {', '.join(binance_missing)} (OKX also required)"
+
+            raise ValueError(error_msg)
 
     @classmethod
     def register_adapter(cls, name: str, adapter_class: Type[ExchangeAdapter]):

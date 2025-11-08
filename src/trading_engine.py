@@ -37,7 +37,7 @@ class TradingEngine:
 
         # 状态变量
         self.signal_history: List[Dict[str, Any]] = []
-        self.max_signal_history = 30
+        self.max_signal_history = self.config.engine.signal_history_max
 
         print("✅ 交易引擎初始化完成")
 
@@ -70,7 +70,7 @@ class TradingEngine:
             print("🔄 初始化交易执行模块...")
             self.position_manager = PositionManager(self.exchange)
             self.order_executor = OrderExecutor(self.exchange)
-            self.frequency_guard = FrequencyGuard(min_interval_minutes=15)
+            self.frequency_guard = FrequencyGuard()
 
             print("✅ 所有模块初始化成功")
 
@@ -219,7 +219,7 @@ class TradingEngine:
 
             # 准备K线数据（用于AI分析）
             kline_data = []
-            for _, row in df.tail(5).iterrows():
+            for _, row in df.tail(self.config.engine.signal_context_count + 2).iterrows():
                 kline_data.append({
                     'timestamp': row['timestamp'],
                     'open': row['open'],
@@ -325,7 +325,7 @@ class TradingEngine:
 
             # 添加信号历史到市场数据
             if self.signal_history:
-                market_data['signal_history'] = self.signal_history[-3:]  # 最近3个信号
+                market_data['signal_history'] = self.signal_history[-self.config.engine.signal_context_count:]  # 最近N个信号
 
             # 使用AI分析器生成信号
             signal_data = self.ai_analyzer.analyze_market(market_data)
@@ -434,7 +434,7 @@ class TradingEngine:
                 'test_mode': self.trade_config.test_mode
             },
             'signal_history_count': len(self.signal_history),
-            'recent_signals': self.signal_history[-5:] if self.signal_history else [],
+            'recent_signals': self.signal_history[-self.config.engine.signal_context_count:] if self.signal_history else [],
             'order_stats': self.order_executor.get_execution_statistics(),
             'frequency_stats': self.frequency_guard.get_trade_statistics()
         }

@@ -170,7 +170,7 @@ class TechnicalIndicators:
         """
         try:
             if len(df) < period + 1:
-                return 50.0  # 数据不足时返回中性值
+                return self.config.rsi_neutral  # 数据不足时返回中性值
 
             delta = df['close'].diff()
             gain = (delta.where(delta > 0, 0)).rolling(window=period, min_periods=1).mean()
@@ -184,7 +184,7 @@ class TechnicalIndicators:
 
         except Exception as e:
             print(f"RSI计算失败: {e}")
-            return 50.0
+            return self.config.rsi_neutral
 
     def calculate_bollinger_bands(self, df: pd.DataFrame, period: int = 20, std: float = 2.0) -> Dict[str, float]:
         """
@@ -272,9 +272,10 @@ class TechnicalIndicators:
         try:
             if len(df) < lookback:
                 current_price = df['close'].iloc[-1]
+                pct = self.config.support_resistance_default_pct
                 return {
-                    'resistance': current_price * 1.05,
-                    'support': current_price * 0.95,
+                    'resistance': current_price * (1 + pct),
+                    'support': current_price * (1 - pct),
                     'resistance_distance': 5.0,
                     'support_distance': 5.0
                 }
@@ -298,9 +299,10 @@ class TechnicalIndicators:
         except Exception as e:
             print(f"支撑阻力计算失败: {e}")
             current_price = df['close'].iloc[-1]
+            pct = self.config.support_resistance_default_pct
             return {
-                'resistance': current_price * 1.05,
-                'support': current_price * 0.95,
+                'resistance': current_price * (1 + pct),
+                'support': current_price * (1 - pct),
                 'resistance_distance': 5.0,
                 'support_distance': 5.0
             }
@@ -336,19 +338,19 @@ class TechnicalIndicators:
             macd_trend = indicators.macd.get('trend', 'neutral')
 
             # 布林带位置
-            bb_position = indicators.bollinger_bands.get('position', 0.5)
-            if bb_position > 0.8:
+            bb_position = indicators.bollinger_bands.get('position', self.config.bb_neutral)
+            if bb_position > self.config.bb_overbought:
                 bb_signal = 'overbought'
-            elif bb_position < 0.2:
+            elif bb_position < self.config.bb_oversold:
                 bb_signal = 'oversold'
             else:
                 bb_signal = 'neutral'
 
             # RSI水平
-            rsi_level = indicators.rsi or 50
-            if rsi_level > 70:
+            rsi_level = indicators.rsi or self.config.rsi_neutral
+            if rsi_level > self.config.rsi_overbought:
                 rsi_signal = 'overbought'
-            elif rsi_level < 30:
+            elif rsi_level < self.config.rsi_oversold:
                 rsi_signal = 'oversold'
             else:
                 rsi_signal = 'neutral'
@@ -375,7 +377,7 @@ class TechnicalIndicators:
                 'rsi_signal': rsi_signal,
                 'rsi_value': rsi_level,
                 'bb_position': bb_position,
-                'volume_strength': 'high' if indicators.volume_ratio > 1.5 else 'low' if indicators.volume_ratio < 0.5 else 'normal'
+                'volume_strength': 'high' if indicators.volume_ratio > self.config.volume_high_threshold else 'low' if indicators.volume_ratio < self.config.volume_low_threshold else 'normal'
             }
 
         except Exception as e:

@@ -84,20 +84,8 @@ class DeepSeekTradingBot:
         self.run_once()
 
         # 设置定时调度
-        if timeframe == '1m':
-            interval = 60  # 1分钟
-        elif timeframe == '5m':
-            interval = 300  # 5分钟
-        elif timeframe == '15m':
-            interval = 900  # 15分钟
-        elif timeframe == '30m':
-            interval = 1800  # 30分钟
-        elif timeframe == '1h':
-            interval = 3600  # 1小时
-        elif timeframe == '4h':
-            interval = 14400  # 4小时
-        else:
-            interval = 900  # 默认15分钟
+        scheduler_config = config.scheduler
+        interval = scheduler_config.timeframe_intervals.get(timeframe, scheduler_config.default_interval_seconds)
 
         self.running = True
 
@@ -171,7 +159,7 @@ class DeepSeekTradingBot:
             recent_signals = status.get('recent_signals', [])
             if recent_signals:
                 print("   - 最近信号:")
-                for signal in recent_signals[-3:]:
+                for signal in recent_signals[-config.engine.signal_context_count:]:
                     print(f"     {signal['timestamp']}: {signal['signal']} ({signal['confidence']})")
 
             # 订单统计

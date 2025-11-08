@@ -8,14 +8,16 @@
 
 from typing import Dict, Any, Optional, List
 import time
+from ..config import get_config
 
 
 class FallbackSignalGenerator:
     """备用信号生成器"""
 
     def __init__(self):
+        self.config = get_config().fallback_generator
         self.signal_history = []
-        self.max_history = 30
+        self.max_history = self.config.max_history
 
     def generate_signal(self, market_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -116,25 +118,25 @@ class FallbackSignalGenerator:
         # 5. 趋势评分
         overall_trend = trend_analysis.get('overall', '').lower()
         if '上涨' in overall_trend or 'uptrend' in overall_trend:
-            scores['trend'] = +1.5  # 趋势向上，加分
+            scores['trend'] = +self.config.trend_weight  # 趋势向上，加分
         elif '下跌' in overall_trend or 'downtrend' in overall_trend:
-            scores['trend'] = -1.5  # 趋势向下，减分
+            scores['trend'] = -self.config.trend_weight  # 趋势向下，减分
         else:
             scores['trend'] = 0     # 震荡趋势，中性
 
         # 6. 成交量评分
         volume_ratio = technical_data.get('volume_ratio', 1.0)
         if volume_ratio > 1.5:
-            scores['volume'] = +0.5  # 高成交量，加分
+            scores['volume'] = +self.config.volume_weight  # 高成交量，加分
         elif volume_ratio < 0.5:
-            scores['volume'] = -0.5  # 低成交量，减分
+            scores['volume'] = -self.config.volume_weight  # 低成交量，减分
         else:
             scores['volume'] = 0     # 正常成交量
 
         # 7. 价格变化评分
         price_change = market_data.get('price_change', 0)
         if abs(price_change) > 1.0:  # 大于1%的变化
-            scores['price_change'] = 0.5 if price_change > 0 else -0.5
+            scores['price_change'] = self.config.volume_weight if price_change > 0 else -self.config.volume_weight
         else:
             scores['price_change'] = 0
 
@@ -144,9 +146,9 @@ class FallbackSignalGenerator:
                          market_data: Dict[str, Any]) -> str:
         """确定交易信号"""
         # 基于分数判断
-        if total_score > 2:
+        if total_score > self.config.buy_threshold:
             base_signal = 'BUY'
-        elif total_score < -2:
+        elif total_score < self.config.sell_threshold:
             base_signal = 'SELL'
         else:
             base_signal = 'HOLD'
@@ -213,8 +215,8 @@ class FallbackSignalGenerator:
                                    market_data: Dict[str, Any]) -> tuple:
         """计算止损止盈价格"""
         # 默认百分比
-        stop_loss_pct = 0.02  # 2%
-        take_profit_pct = 0.04  # 4%
+        stop_loss_pct = self.config.stop_loss_pct
+        take_profit_pct = self.config.take_profit_pct
 
         # 获取支撑阻力位
         support = technical_data.get('support', current_price * 0.98)

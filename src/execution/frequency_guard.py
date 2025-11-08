@@ -6,15 +6,21 @@
 
 import time
 from typing import Dict, Any, Optional, List
+from ..config import get_config
 
 
 class FrequencyGuard:
     """防频繁交易保护器"""
 
-    def __init__(self, min_interval_minutes: int = 15):
-        self.min_interval_seconds = min_interval_minutes * 60
+    def __init__(self, config=None):
+        # 使用传入的配置或从全局获取配置
+        if config is None:
+            config = get_config().frequency_guard
+
+        self.config = config
+        self.min_interval_seconds = self.config.min_interval_minutes * 60
         self.signal_history: List[Dict[str, Any]] = []
-        self.max_history = 50
+        self.max_history = self.config.max_history
 
     def should_allow_trade(self, signal_data: Dict[str, Any],
                          current_position: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -125,10 +131,10 @@ class FrequencyGuard:
         recent_signals = [record['signal'] for record in self.signal_history[-5:]]
 
         # 检查是否是连续的相同信号
-        if len(recent_signals) >= 3 and recent_signals[-3:] == [current_signal] * 3:
+        if len(recent_signals) >= self.config.consecutive_limit and recent_signals[-self.config.consecutive_limit:] == [current_signal] * self.config.consecutive_limit:
             return {
                 'allow': False,
-                'reason': f'连续3次相同的{current_signal}信号，为避免频繁操作暂不执行'
+                'reason': f'连续{self.config.consecutive_limit}次相同的{current_signal}信号，为避免频繁操作暂不执行'
             }
 
         # 检查HOLD信号后的交易信号
@@ -141,10 +147,10 @@ class FrequencyGuard:
                 else:
                     break
 
-            if hold_count < 2:
+            if hold_count < self.config.hold_confirm_periods:
                 return {
                     'allow': False,
-                    'reason': 'HOLD信号后需要至少2个周期的确认才能执行新交易'
+                    'reason': f'HOLD信号后需要至少{self.config.hold_confirm_periods}个周期的确认才能执行新交易'
                 }
 
         return {'allow': True, 'reason': '连续信号检查通过'}
@@ -192,11 +198,11 @@ class FrequencyGuard:
 
     def _check_signal_reversal_frequency(self, current_signal: str) -> Dict[str, Any]:
         """检查信号反转频率"""
-        if len(self.signal_history) < 10:
+        if len(self.signal_history) < self.config.reversal_window:
             return {'allow': True, 'reason': '历史信号不足'}
 
         # 获取最近的信号
-        recent_signals = [record['signal'] for record in self.signal_history[-10:]]
+        recent_signals = [record['signal'] for record in self.signal_history[-self.config.reversal_window:]]
 
         # 计算信号反转次数
         reversals = 0
@@ -206,7 +212,7 @@ class FrequencyGuard:
                     reversals += 1
 
         # 如果反转过于频繁，进行保护
-        if reversals >= 4:  # 10个信号中反转4次以上
+        if reversals >= self.config.max_reversals:
             return {
                 'allow': False,
                 'reason': f'近期信号反转过于频繁({reversals}次)，建议观望一段时间'
@@ -258,9 +264,9 @@ class FrequencyGuard:
         """获取保护机制摘要"""
         return f"""
 🛡️ 防频繁交易保护机制
-- 最小交易间隔: {self.min_interval_seconds / 60:.0f} 分钟
-- 连续信号保护: 防止连续3次相同信号
+- 最小交易间隔: {self.config.min_interval_minutes} 分钟
+- 连续信号保护: 防止连续{self.config.consecutive_limit}次相同信号
 - 持仓一致性检查: 避免频繁反向开仓
-- 信号反转频率限制: 10个信号中最多3次反���
+- 信号反转频率限制: {self.config.reversal_window}个信号中最多{self.config.max_reversals-1}次反转
 - 历史信号记录: {len(self.signal_history)} 条
         """.strip()
