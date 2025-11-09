@@ -175,3 +175,5 @@ test_simple.py
 # BMAD (local only)
 .bmad-core/
 .bmad-*/
+/bmad
+/.qwen/commands/bmad
