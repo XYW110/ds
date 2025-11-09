@@ -156,3 +156,22 @@ config.json
 api_keys.txt
 secrets.txt
 /.bmad-core
+
+# Local assistant settings
+.claude/
+
+# Runtime databases
+data/*.db
+data/*.sqlite
+
+# Generated test reports
+test_report.json
+TEST_REPORT.md
+test_reports/
+
+# Legacy local scripts
+test_simple.py
+
+# BMAD (local only)
+.bmad-core/
+.bmad-*/
