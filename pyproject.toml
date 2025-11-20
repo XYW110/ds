@@ -24,3 +24,7 @@ disable_error_code = [
     "index",
     "operator"
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src", "."]

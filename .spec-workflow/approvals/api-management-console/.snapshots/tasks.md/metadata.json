@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/api-management-console/tasks.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-11-19T12:24:35.379Z",
+      "trigger": "initial",
+      "approvalId": "approval_1763555075373_3vkghbmtk",
+      "approvalTitle": "api-management-console tasks"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/api-management-console/design.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-11-19T12:17:28.247Z",
+      "trigger": "initial",
+      "approvalId": "approval_1763554648241_qsfnxcqk3",
+      "approvalTitle": "api-management-console design"
+    }
+  ]
+}

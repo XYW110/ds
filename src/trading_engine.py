@@ -38,6 +38,8 @@ class TradingEngine:
         # 状态变量
         self.signal_history: List[Dict[str, Any]] = []
         self.max_signal_history = self.config.engine.signal_history_max
+        self.running = False
+        self.strategy_id = "core-15m"
 
         print("✅ 交易引擎初始化完成")
 
@@ -423,6 +425,55 @@ class TradingEngine:
                 print(f"❌ 执行失败: {exec_result.get('message')}")
 
         print("="*60)
+
+    def start(self) -> bool:
+        """启动策略"""
+        if self.running:
+            print(f"⚠️ 策略 {self.strategy_id} 已在运行中")
+            return False
+        self.running = True
+        print(f"🚀 策略 {self.strategy_id} 已启动")
+        return True
+
+    def stop(self) -> bool:
+        """停止策略"""
+        if not self.running:
+            print(f"⚠️ 策略 {self.strategy_id} 未在运行")
+            return False
+        self.running = False
+        print(f"🛑 策略 {self.strategy_id} 已停止")
+        return True
+
+    def get_status(self) -> Dict[str, Any]:
+        """获取完整状态"""
+        return {
+            'id': self.strategy_id,
+            'status': 'running' if self.running else 'stopped',
+            'running': self.running,
+            'config': {
+                'symbol': self.trade_config.symbol,
+                'timeframe': self.trade_config.timeframe,
+                'leverage': self.trade_config.leverage,
+                'test_mode': self.trade_config.test_mode
+            },
+            'signal_history_count': len(self.signal_history),
+            'recent_signals': self.signal_history[-self.config.engine.signal_context_count:] if self.signal_history else [],
+            'order_stats': self.order_executor.get_execution_statistics(),
+            'frequency_stats': self.frequency_guard.get_trade_statistics()
+        }
+
+    def update_config(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """更新配置参数"""
+        updated = {}
+        for key, value in params.items():
+            if hasattr(self.trade_config, key):
+                setattr(self.trade_config, key, value)
+                updated[key] = value
+            elif hasattr(self.config, key):
+                setattr(self.config, key, value)
+                updated[key] = value
+        print(f"⚙️ 配置已更新: {updated}")
+        return updated
 
     def get_status_summary(self) -> Dict[str, Any]:
         """获取状态摘要"""
