@@ -1,0 +1,12 @@
+# Project-specific folders that should not be committed
+.claude/
+.serena/
+.snow/
+.spec-workflow/
+.workflow/
+
+# Large local databases
+**/embeddings.db
+
+# User-specific settings
+.idea/workspace.xml
